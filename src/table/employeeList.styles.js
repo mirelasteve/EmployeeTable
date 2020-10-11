@@ -1,5 +1,11 @@
 import styled from 'styled-components';
 
+export const Container = styled.div`
+    width:90%;
+    margin:1% 5%;
+    border:2px solid black;
+    font-size:1rem;
+`
 export const InfoRow = styled.tr`
     background-color: ivory;
     &:hover {
@@ -43,7 +49,7 @@ export const InputAddLabel = styled.input`
     color:grey;
     &:hover {
         background: white;
-        padding:5%;
+        
         border:none;
       }
 `
