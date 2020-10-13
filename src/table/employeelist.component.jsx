@@ -1,16 +1,28 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import {IDColumn,Avatar,NameColumn, CompanyColumn,BioColumn,LabelColumn,InfoRow,InputAddLabel, Container } from './employeeList.styles';
+import React, { useState, useEffect } from 'react';
+import ls from 'local-storage';
+
+import {    EmployeeTable,
+            IDColumn,
+            Avatar,
+            NameColumn,
+            CompanyColumn,
+            BioColumn,
+            LabelColumn,
+            InfoRow,
+            TextNotFound,
+            InputAddLabel,
+            SetLabelButton,
+            SearchInput,
+            Container } from './employeeList.styles';
+
 import Pagination from '../pagination/pagination';
+import ModalFullSizeImage from '../modals/modalFullSizeImage';
 
 
-const EmployeeTable = styled.table`
-        border: 1px solid plum;
-        background-color: ivory;        
-         `;
+
 
 const EmployeeList = ({data}) => {
-    // const [ showLongBioFlag, showLongBio ] = useState(false);
+    
     const [ currentPage, setCurrentPage ] = useState(1);
     const [ beginSlice, setBeginSlice ] = useState(0);
     const [ endSlice, setEndSlice ] = useState(20);
@@ -20,13 +32,44 @@ const EmployeeList = ({data}) => {
     const [ labels, setLabels ] = useState({});
     const [ searchLabelsObj, setSearchLabelObj ] = useState({});
     const [ flagNotFound, setFlagNotFound ] = useState(false);
-    // const [ heightImage, setHeightImage ] = useState('10%');
+    const [ flagFullSize, setFlagFullSize ] = useState(Array.from({length:20}).fill(false));
+    const [ imageModal, setImageModal ] = useState(false);
+    const [ indexAvatar, setIndexAvatar ] = useState('');
+    const [ modalAvatar, setModalAvatar ] = useState('');
 
+
+    useEffect(()=>{
+        const getBackgroundColorsLS = async () => {
+            const res = await ls.get('backgroundColors');
+            
+            if(res){
+                setBackgroundColors(JSON.parse(res));
+            }
+        }
+        const getBackgroundLabelsLS = async () => {
+            const res = await ls.get('labels');
+            
+            if(res){
+                setLabels(JSON.parse(res));
+            }
+        }
+        const getSearchObjLS = async () => {
+            const res = await ls.get('searchObj');
+
+            if(res){
+                setSearchLabelObj(JSON.parse(res))
+            }
+        }
+        getBackgroundColorsLS();
+        getBackgroundLabelsLS();
+        getSearchObjLS();
+    },[])
     const setBackgroundColorRow = (event,uuid) => {
         
         const newBackgroundColors = {...backgroundColors};
         newBackgroundColors[uuid] =  event.target.value;
         setBackgroundColors(newBackgroundColors);
+        ls.set('backgroundColors',JSON.stringify(newBackgroundColors))
     }
 
     const inputLabel = (event) => {
@@ -37,6 +80,7 @@ const EmployeeList = ({data}) => {
         const newLabels = {...labels};
         newLabels[uuid] =  currentLabel;
         setLabels(newLabels);
+        ls.set('labels',JSON.stringify(newLabels))
         const newSearchObj = {...searchLabelsObj};
         if( typeof(newSearchObj[currentLabel]) === 'undefined' ){
             newSearchObj[currentLabel] = [{
@@ -58,98 +102,127 @@ const EmployeeList = ({data}) => {
             })
         }
         setSearchLabelObj(newSearchObj);
+        ls.set('searchObj',JSON.stringify(newSearchObj))
+        
     }
 
     const searchLabel = (event) => {
-        console.log(searchLabelsObj[event.target.value])
-        console.log(event.target.value, typeof(event.target.value))
+        
         if(typeof(event.target.value) === 'undefined'){
-            console.log('target undefined')
+        
             setFlagNotFound(false);
             showCurrentData(data.slice(beginSlice-20,endSlice-20));
+
         } else if(typeof(searchLabelsObj[event.target.value]) === 'undefined'){
-            console.log('not found',data,beginSlice,endSlice, data.slice(beginSlice,endSlice-20))
+        
             setFlagNotFound(true);
             showCurrentData(data.slice(beginSlice,endSlice));
+
         } else {
-            console.log('here')
+        
             showCurrentData(searchLabelsObj[event.target.value])
             setFlagNotFound(false)
         }
         
-        console.log(currentData)
+
     }
-    
-    return(
-        <Container>
+
+    const resizeAvatar = (val,index,x) =>{
+        const newFlagAvatar = [...flagFullSize];
+        newFlagAvatar[index] = val;
+        setFlagFullSize(newFlagAvatar)
         
-        <Pagination currentPage = {currentPage} maxSize = {data.length} ></Pagination>
-        { currentPage > 1 ? <button onClick={()=>{
-                setCurrentPage(currentPage-1);
-                setBeginSlice(beginSlice-20);
-                setEndSlice(endSlice-20);
-                showCurrentData(data.slice(beginSlice-20,endSlice-20))
-            }}>Previous page</button>
-            : <span></span>
+    }
+    const showImage = (flag,avatar,index) => {
+        
+        if(flag){
+           setImageModal(true);
+           setIndexAvatar(index); 
+           setModalAvatar(avatar)
+        } else {
+           
+            return(<img
+                  style={{height:'auto',width:'3rem'}}src={avatar} alt={avatar}
+                  onClick={()=>resizeAvatar(true,index,flagFullSize[index])}/>
+                )
+            
         }
-        { endSlice <= data.length ? <button onClick={()=>{
-                setCurrentPage(currentPage+1);
-                setBeginSlice(beginSlice+20);
-                setEndSlice(endSlice+20);
-                showCurrentData(data.slice(beginSlice+20,endSlice+20))
-            }}>Next page</button>
-            :<span></span>
-        }
-        <input type='search' onInput={(e)=>searchLabel(e)}></input>
-        {flagNotFound 
-            ? <span>Cannot find</span>
-            : <span></span>
-        }
-        <EmployeeTable>
-            <thead>
-                <tr>
-                    <td>Index</td>
-                    <td></td>
-                    <td>ID</td>
-                    <td>Avatar</td>
-                    <td>Name</td>
-                    <td>Company</td>
-                    <td>Bio</td>
-                    <td>Title</td>
-                    <td>Label</td>
-                </tr>
-            </thead>
-            <tbody>
-                {currentData.map(({uuid,avatar,name,company,bio,title},index)=>
-                <InfoRow key={uuid} style={{backgroundColor:backgroundColors[uuid]}}>
-                    <td>{index+1}</td>
-                    <td><input type='color' onChange={(e)=>setBackgroundColorRow(e,uuid)}></input></td>
-                    <IDColumn>{uuid}</IDColumn>
-                    <Avatar>
-                        <img style={{height:'10%'}} onClick={()=>console.log(1)} src={avatar} alt='avatar'/>
-                    </Avatar>
-                    <NameColumn>{name}</NameColumn>
-                    <CompanyColumn>{company}</CompanyColumn>
-                    <BioColumn>{bio.slice(0,20)}</BioColumn>
-                    {/* <BioColumn onMouseOver={()=>showLongBio(true)} onMouseLeave={()=>showLongBio(false)}>{showLongBioFlag ? bio : bio.slice(0,50)}</BioColumn> */}
-                    <td>{title}</td>
-                    <td>
-                        {labels[uuid]
-                        ? <LabelColumn>{labels[uuid]}</LabelColumn>
-                        : <>
-                            <InputAddLabel type='text' title='Set Label' onInput={(e)=>inputLabel(e)} placeholder='Add label' />
-                            <button onClick={(e)=>setLabel(e,uuid,avatar,name,company,bio,title)}>SetLabel</button>
-                          </>
-                        }
-                    </td>
-                        
-                        
-                </InfoRow>
-                )}
-            </tbody>
-        </EmployeeTable>
+    }
+    const handleSetImageFalse = () => {
+       
+        setImageModal(false);
+        resizeAvatar(false,indexAvatar);
+    
+    }
+    return(
+        <>
+        {imageModal
+        ? <ModalFullSizeImage setImage={handleSetImageFalse} avatar={modalAvatar}></ModalFullSizeImage>
+        : <Container>
+        
+            <Pagination 
+                currentPage = {currentPage} 
+                maxSize = {data.length} 
+                setCurrentPage={setCurrentPage}
+                setBeginSlice={setBeginSlice}
+                setEndSlice={setEndSlice}
+                showCurrentData={showCurrentData}   
+                beginSlice={beginSlice}
+                endSlice={endSlice}
+                data={data}
+            />
+
+            <SearchInput type='search' onInput={(e)=>searchLabel(e)} onClick={()=>setFlagNotFound(false)} />
+
+            {flagNotFound 
+                ? <TextNotFound >Cannot find</TextNotFound>
+                : <span></span>
+            }
+            <EmployeeTable>
+                <thead style={{'font-weight':'bold'}}>
+                    <tr>
+                        <td>Index</td>
+                        <td></td>
+                        <td>ID</td>
+                        <td>Avatar</td>
+                        <td>Name</td>
+                        <td>Company</td>
+                        <td>Bio</td>
+                        <td>Title</td>
+                        <td>Label</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {currentData.map(({uuid,avatar,name,company,bio,title},index)=>
+                    <InfoRow key={uuid} backgroundColor={backgroundColors[uuid]} index={index}>
+
+                        <td>{index+1}</td>
+                        <td><input type='color' onChange={(e)=>setBackgroundColorRow(e,uuid)}></input></td>
+                        <IDColumn>{uuid}</IDColumn>
+                        <Avatar>
+                            {showImage(flagFullSize[index],avatar,index)}
+                        </Avatar>
+                        <NameColumn>{name}</NameColumn>
+                        <CompanyColumn>{company}</CompanyColumn>
+                        <BioColumn>{bio.slice(0,20)}</BioColumn>
+                        {/* <BioColumn onMouseOver={()=>showLongBio(true)} onMouseLeave={()=>showLongBio(false)}>{showLongBioFlag ? bio : bio.slice(0,50)}</BioColumn> */}
+                        <td>{title}</td>
+                        <td>
+                            {labels[uuid]
+                            ? <LabelColumn>{labels[uuid]}</LabelColumn>
+                            : <>
+                                <InputAddLabel type='text' title='Set Label' onInput={(e)=>inputLabel(e)} placeholder='Add label' />
+                                <SetLabelButton onClick={(e)=>setLabel(e,uuid,avatar,name,company,bio,title)}>Set</SetLabelButton>
+                              </>
+                            }
+                        </td>
+                    </InfoRow>
+                    )}
+                </tbody>
+            </EmployeeTable>
         </Container>
         
+        }</>
     )
 }
 

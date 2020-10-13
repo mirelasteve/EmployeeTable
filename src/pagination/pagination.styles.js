@@ -1,21 +1,53 @@
 import styled from 'styled-components';
 
 export const PaginationUl = styled.ul`
-    list-style:none;
-    padding:1% 40rem;
-    font-size:2rem;
-    border:1px solid black;
+    
     background-color: #eef3fe;
+    font-size:1rem;    
+    font-weight:bold;
+    list-style:none;
+    padding-left:30%;
+    
+    @media (max-width: 768px) {
+        font-size:0.6rem;
+      }
 `
 
 export const PaginationLi = styled.li`
-    color:#3c99dc;
-    border:1px solid #d5f3fe;
+    color:black;
     display:inline;
-    padding:15%;
     margin:2%;
+    
+`
+
+export const ButtonActive = styled.button`
+    background-color: #181818;
+    box-shadow: none;
+    color: #fff;
+    cursor: pointer;
+    font-size:1rem;
+    justify-content: center;
+    padding:2% 5%;
+    text-align: center;
     &:hover {
-        
-        border:1px solid #d5f3cc;
+        background-color:#585858
+    }
+    @media (max-width: 768px) {
+        font-size:0.6rem;
+    }
+`
+
+export const ButtonInActive = styled.button`
+    background-color: #383838;
+    box-shadow: none;
+    opacity: .5;
+    color: #fff;
+    cursor: not-allowed;
+    justify-content: center;
+    padding:2% 5%;
+    text-align: center;
+    font-size:1rem;
+    @media (max-width: 768px) {
+        font-size:0.6rem;
     }
 `

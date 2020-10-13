@@ -1,24 +1,35 @@
 import React from 'react'
-import {PaginationUl,PaginationLi} from './pagination.styles';
+import {PaginationUl,PaginationLi,ButtonActive,ButtonInActive} from './pagination.styles';
 
-const Pagination = ({currentPage,maxSize}) => {
+const Pagination = ({currentPage,maxSize,setCurrentPage,setBeginSlice,setEndSlice,showCurrentData,beginSlice,endSlice,data}) => {
     const numPages = Math.ceil(maxSize / 20);
-    const pagesBlock = [];
-    let page = 1;
-    while(pagesBlock.length<numPages){
-        pagesBlock.push(page);
-        page+=1;
-    }
-    // console.log(pagesBlock)
+    
     return (
+            
         <PaginationUl>
-            {pagesBlock.map(page=>
-                currentPage === page
-                    ? <PaginationLi style={{color:'red'}} key={page}>{page}</PaginationLi>
-                    : <PaginationLi key={page}>{page}</PaginationLi>
-                   
-                
-            )}
+            <PaginationLi>
+                { currentPage > 1 
+                    ? <ButtonActive onClick={()=>{
+                        setCurrentPage(currentPage-1);
+                        setBeginSlice(beginSlice-20);
+                        setEndSlice(endSlice-20);
+                        showCurrentData(data.slice(beginSlice-20,endSlice-20))
+                        }}>Previous</ButtonActive>
+                    : <ButtonInActive>Disabled</ButtonInActive>
+                }
+            </PaginationLi>
+            <PaginationLi>Page {currentPage} of {numPages}</PaginationLi>
+            <PaginationLi>
+                { endSlice <= data.length 
+                    ? <ButtonActive onClick={()=>{
+                        setCurrentPage(currentPage+1);
+                        setBeginSlice(beginSlice+20);
+                        setEndSlice(endSlice+20);
+                        showCurrentData(data.slice(beginSlice+20,endSlice+20))
+                    }}>Next</ButtonActive >
+                    :<ButtonInActive>Disabled</ButtonInActive>
+                }
+            </PaginationLi>
         </PaginationUl>
     )
 }
