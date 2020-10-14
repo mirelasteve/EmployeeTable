@@ -1,10 +1,11 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-    border:2px solid black;
+    border:2px solid  #d8d8d8;
     font-size:1rem;
     font-family: 'Poppins', serif;
     margin:1% 5%;
+    padding:2%;
     overflow-x:auto;
     width:90%;
    
@@ -12,6 +13,7 @@ export const Container = styled.div`
 export const EmployeeTable = styled.table`
     border-collapse: collapse;
     border-spacing: 0;
+    border:1px solid #f8f8f8;
     @media (max-width: 768px) {
         font-size:0.6rem;
       }    
@@ -46,7 +48,7 @@ export const BioColumn = styled.td`
     
 `
 
-export const LabelColumn = styled.td`
+export const LabelColumn = styled.div`
     color:black;
     width:10%;
     
@@ -66,7 +68,14 @@ export const InputAddLabel = styled.input`
 `
 
 export const SetLabelButton = styled.button`
-      font-size:0.5rem;
+    background-color: #f8f8f8;
+    border:none;      
+    font-size:0.8rem;
+    padding:2% 5%;
+    float:right;
+    @media (max-width: 768px) {
+        font-size:0.5rem;
+      } 
 `
 export const SearchInput = styled.input`
     background-color: #fff;
@@ -81,8 +90,7 @@ export const SearchInput = styled.input`
     @media (max-width: 768px) {
         font-size:0.6rem;
         height:1.5rem;
-        line-height:1rem;
-      }
+    }
 `
 export const TextNotFound = styled.span`
     margin-left:1%;

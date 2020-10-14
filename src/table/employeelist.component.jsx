@@ -172,14 +172,14 @@ const EmployeeList = ({data}) => {
                 data={data}
             />
 
-            <SearchInput type='search' onInput={(e)=>searchLabel(e)} onClick={()=>setFlagNotFound(false)} />
+            <SearchInput type='search' onInput={(e)=>searchLabel(e)} onClick={()=>setFlagNotFound(false)} placeholder='Search ...'/>
 
             {flagNotFound 
-                ? <TextNotFound >Cannot find</TextNotFound>
+                ? <TextNotFound onClick={()=>setFlagNotFound(false)}>Cannot find</TextNotFound>
                 : <span></span>
             }
             <EmployeeTable>
-                <thead style={{'font-weight':'bold'}}>
+                <thead style={{'fontWeight':'bold'}}>
                     <tr>
                         <td>Index</td>
                         <td></td>
@@ -204,8 +204,7 @@ const EmployeeList = ({data}) => {
                         </Avatar>
                         <NameColumn>{name}</NameColumn>
                         <CompanyColumn>{company}</CompanyColumn>
-                        <BioColumn>{bio.slice(0,20)}</BioColumn>
-                        {/* <BioColumn onMouseOver={()=>showLongBio(true)} onMouseLeave={()=>showLongBio(false)}>{showLongBioFlag ? bio : bio.slice(0,50)}</BioColumn> */}
+                        <BioColumn>{bio}</BioColumn>
                         <td>{title}</td>
                         <td>
                             {labels[uuid]
